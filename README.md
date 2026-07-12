@@ -30,6 +30,22 @@ and Power BI.
 
 ---
 
+## Dashboard Preview
+
+### Sales Overview
+![Sales Overview](screenshots/sales_overview.png)
+
+### Customer Analysis
+![Customer Analysis](screenshots/customer_analysis.png)
+
+### Order Health
+![Order Health](screenshots/order_health.png)
+
+### Seller Performance
+![Seller Performance](screenshots/seller_performance.png)
+
+---
+
 ## Key Business Insights
 
 1. **Revenue grew 25x from Oct 2016 to Nov 2017** — driven by platform 
