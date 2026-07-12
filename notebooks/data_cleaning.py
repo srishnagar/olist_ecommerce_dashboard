@@ -1,6 +1,6 @@
 import pandas as pd
 
-# ── Load ──────────────────────────────────────────────────────────────
+# Load all 8 datasets
 customers            = pd.read_csv('D:/olist_ecommerce_dashboard/data/olist_customers_dataset.csv')
 orders               = pd.read_csv('D:/olist_ecommerce_dashboard/data/olist_orders_dataset.csv')
 order_items          = pd.read_csv('D:/olist_ecommerce_dashboard/data/olist_order_items_dataset.csv')
@@ -10,7 +10,7 @@ products             = pd.read_csv('D:/olist_ecommerce_dashboard/data/olist_prod
 sellers              = pd.read_csv('D:/olist_ecommerce_dashboard/data/olist_sellers_dataset.csv')
 category_translation = pd.read_csv('D:/olist_ecommerce_dashboard/data/product_category_name_translation.csv')
 
-# ── Clean orders ──────────────────────────────────────────────────────
+# Clean orders — parse dates, filter to delivered only, add derived columns
 date_cols = ['order_purchase_timestamp', 'order_delivered_customer_date',
              'order_estimated_delivery_date']
 for col in date_cols:
@@ -26,39 +26,28 @@ orders['delivery_days']    = (
 ).dt.days
 orders['on_time'] = orders['order_delivered_customer_date'] <= orders['order_estimated_delivery_date']
 
-# ── Clean products ────────────────────────────────────────────────────
+# Translate product category names from Portuguese to English
 products = products.merge(category_translation, on='product_category_name', how='left')
 products['category'] = products['product_category_name_english'].fillna('unknown')
 
-# ── Clean reviews ─────────────────────────────────────────────────────
+# Keep one review per order (some orders have duplicates)
 reviews = reviews.drop_duplicates(subset='order_id', keep='first')[['order_id', 'review_score']]
 
-# ── Clean payments ────────────────────────────────────────────────────
+# Aggregate payments — some orders have multiple payment entries (installments)
 payments = payments.groupby('order_id', as_index=False)['payment_value'].sum()
 
-# ── Merge everything ──────────────────────────────────────────────────
-# orders → customers (via customer_id)
+# Merge everything into one master dataframe
 df = orders.merge(customers, on='customer_id', how='left')
-
-# df → order_items (via order_id)
 df = df.merge(order_items, on='order_id', how='left')
-
-# df → payments (via order_id)
 df = df.merge(payments, on='order_id', how='left')
-
-# df → reviews (via order_id)
 df = df.merge(reviews, on='order_id', how='left')
-
-# df → products (via product_id) — only keep category
 df = df.merge(products[['product_id', 'category']], on='product_id', how='left')
-
-# df → sellers (via seller_id) — only keep seller_state
 df = df.merge(sellers[['seller_id', 'seller_state']], on='seller_id', how='left')
 
-# ── Drop nulls in critical columns ────────────────────────────────────
+# Drop rows where payment or delivery data is missing — can't use these for analysis
 df = df.dropna(subset=['payment_value', 'delivery_days'])
 
-# ── Save ──────────────────────────────────────────────────────────────
+# Save cleaned dataset
 output_path = 'D:/olist_ecommerce_dashboard/data/olist_cleaned.csv'
 df.to_csv(output_path, index=False)
 

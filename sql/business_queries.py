@@ -2,9 +2,11 @@ import pandas as pd
 from pandasql import sqldf
 
 df = pd.read_csv('D:/olist_ecommerce_dashboard/data/olist_cleaned.csv')
+
+# Helper to run SQL queries directly on the dataframe
 pysql = lambda q: sqldf(q, {'df': df})
 
-# ── Q1: Total revenue, total orders, average order value ──────────────
+# Q1: High-level business metrics
 q1 = pysql("""
     SELECT 
         COUNT(DISTINCT order_id)        AS total_orders,
@@ -15,7 +17,7 @@ q1 = pysql("""
 print("=== Q1: Overall Business Metrics ===")
 print(q1)
 
-# ── Q2: Monthly revenue trend ─────────────────────────────────────────
+# Q2: How has revenue trended month over month?
 q2 = pysql("""
     SELECT 
         order_year,
@@ -30,7 +32,7 @@ q2 = pysql("""
 print("\n=== Q2: Monthly Revenue Trend ===")
 print(q2)
 
-# ── Q3: Revenue by product category ──────────────────────────────────
+# Q3: Which product categories are driving the most revenue?
 q3 = pysql("""
     SELECT 
         category,
@@ -44,7 +46,7 @@ q3 = pysql("""
 print("\n=== Q3: Top 10 Categories by Revenue ===")
 print(q3)
 
-# ── Q4: On-time delivery rate ─────────────────────────────────────────
+# Q4: What percentage of orders are delivered on time?
 q4 = pysql("""
     SELECT
         on_time,
@@ -55,7 +57,7 @@ q4 = pysql("""
 print("\n=== Q4: On-Time vs Late Deliveries ===")
 print(q4)
 
-# ── Q5: Average delivery days by customer state ───────────────────────
+# Q5: Which states have the slowest delivery times? (logistics gap analysis)
 q5 = pysql("""
     SELECT 
         customer_state,
@@ -69,7 +71,7 @@ q5 = pysql("""
 print("\n=== Q5: Top 10 Slowest States (Avg Delivery Days) ===")
 print(q5)
 
-# ── Q6: Average review score by category ─────────────────────────────
+# Q6: Do higher-rated categories correlate with specific product types?
 q6 = pysql("""
     SELECT 
         category,
@@ -83,7 +85,7 @@ q6 = pysql("""
 print("\n=== Q6: Top 10 Categories by Review Score ===")
 print(q6)
 
-# ── Q7: Top 10 sellers by revenue ────────────────────────────────────
+# Q7: Top sellers by revenue — do high revenue sellers also have high ratings?
 q7 = pysql("""
     SELECT 
         seller_id,
@@ -99,4 +101,4 @@ q7 = pysql("""
 print("\n=== Q7: Top 10 Sellers by Revenue ===")
 print(q7)
 
-print("\n✅ All queries done!")
+print("\nAll queries done!")
